@@ -1,42 +1,45 @@
 <?php
-// app/Http/Controllers/TaskController.php
 
 namespace App\Http\Controllers;
 
-use App\Models\Task;
+use App\Services\TaskService;
+use App\Http\Requests\CreateTaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
+    protected $taskService;
+
+    public function __construct(TaskService $taskService)
+    {
+        $this->taskService = $taskService;
+    }
+
     // 全タスクを取得
     public function index()
     {
-        return Task::all();
+        return response()->json($this->taskService->getAllTasks());
     }
 
     // タスクを新規作成
-    public function store(Request $request)
+    public function create(CreateTaskRequest $request)
     {
-        $task = Task::create([
-            'title' => $request->title,
-            'description' => $request->description,
-        ]);
+        $task = $this->taskService->createTask($request->validated());
         return response()->json($task, 201);
     }
 
     // タスクを更新
-    public function update(Request $request, $id)
+    public function update(UpdateTaskRequest $request, $id)
     {
-        $task = Task::findOrFail($id);
-        $task->update($request->all());
+        $task = $this->taskService->updateTask($id, $request->validated());
         return response()->json($task);
     }
 
     // タスクを削除
-    public function destroy($id)
+    public function delete($id)
     {
-        $task = Task::findOrFail($id);
-        $task->delete();
+        $this->taskService->deleteTask($id);
         return response()->json(null, 204);
     }
 }
