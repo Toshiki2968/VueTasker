@@ -17,6 +17,7 @@
   
   onMounted(async () => {
     const response = await api.get('/tasks');
+    console.log(response);
     tasks.value = response.data;
   });
   </script>
